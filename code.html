@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Live Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #4a6fc7;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .search-container {
+            padding: 25px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: all 0.3s;
+            outline: none;
+        }
+        
+        .search-box:focus {
+            border-color: #4a6fc7;
+            box-shadow: 0 0 0 3px rgba(74, 111, 199, 0.2);
+        }
+        
+        .search-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .results-container {
+            padding: 0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .student-count {
+            padding: 15px 25px;
+            background: #f1f5fd;
+            border-bottom: 1px solid #eaeaea;
+            font-weight: 600;
+            color: #4a6fc7;
+        }
+        
+        .student-list {
+            list-style: none;
+        }
+        
+        .student-item {
+            padding: 18px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .student-item:hover {
+            background: #f9fbff;
+        }
+        
+        .student-item:last-child {
+            border-bottom: none;
+        }
+        
+        .student-name {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .student-roll {
+            background: #4a6fc7;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .no-results {
+            padding: 40px 25px;
+            text-align: center;
+            color: #888;
+            font-size: 16px;
+        }
+        
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .student-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .student-roll {
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Student Portal</h1>
+            <p>Search students by name or roll number</p>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchInput" placeholder="Enter student name or roll number...">
+            <div class="search-info">Start typing to filter students in real-time</div>
+        </div>
+        
+        <div class="results-container">
+            <div class="student-count" id="studentCount">Showing 50 students</div>
+            <ul class="student-list" id="studentList">
+                <!-- Student list will be populated by JavaScript -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Sample student data
+        const students = [
+            { name: "Aarav Sharma", roll: "101" },
+            { name: "Aditi Patel", roll: "102" },
+            { name: "Amit Kumar", roll: "103" },
+            { name: "Anjali Singh", roll: "104" },
+            { name: "Arun Verma", roll: "105" },
+            { name: "Bhavya Gupta", roll: "106" },
+            { name: "Chetan Mehta", roll: "107" },
+            { name: "Deepak Joshi", roll: "108" },
+            { name: "Divya Reddy", roll: "109" },
+            { name: "Gaurav Malhotra", roll: "110" },
+            { name: "Ishita Chatterjee", roll: "111" },
+            { name: "Karan Desai", roll: "112" },
+            { name: "Kriti Agarwal", roll: "113" },
+            { name: "Manish Tiwari", roll: "114" },
+            { name: "Neha Kapoor", roll: "115" },
+            { name: "Nikhil Bansal", roll: "116" },
+            { name: "Pooja Choudhary", roll: "117" },
+            { name: "Priya Sharma", roll: "118" },
+            { name: "Rahul Singh", roll: "119" },
+            { name: "Riya Mehta", roll: "120" },
+            { name: "Rohan Kumar", roll: "121" },
+            { name: "Sanya Verma", roll: "122" },
+            { name: "Shreya Patel", roll: "123" },
+            { name: "Siddharth Rao", roll: "124" },
+            { name: "Simran Kaur", roll: "125" },
+            { name: "Sneha Iyer", roll: "126" },
+            { name: "Suresh Nair", roll: "127" },
+            { name: "Tanvi Shah", roll: "128" },
+            { name: "Varun Gupta", roll: "129" },
+            { name: "Vikas Yadav", roll: "130" },
+            { name: "Abhishek Mishra", roll: "131" },
+            { name: "Ananya Das", roll: "132" },
+            { name: "Ankit Jain", roll: "133" },
+            { name: "Ashwin Menon", roll: "134" },
+            { name: "Bhaskar Rao", roll: "135" },
+            { name: "Dipika Pillai", roll: "136" },
+            { name: "Harshita Sinha", roll: "137" },
+            { name: "Jatin Khanna", roll: "138" },
+            { name: "Kavya Nair", roll: "139" },
+            { name: "Manoj Srinivasan", roll: "140" },
+            { name: "Naveen Chawla", roll: "141" },
+            { name: "Parth Shah", roll: "142" },
+            { name: "Preeti Menon", roll: "143" },
+            { name: "Rajeshwari Iyer", roll: "144" },
+            { name: "Ritika Bajaj", roll: "145" },
+            { name: "Sanjay Kapoor", roll: "146" },
+            { name: "Shivani Deshpande", roll: "147" },
+            { name: "Sonal Mathur", roll: "148" },
+            { name: "Uday Kumar", roll: "149" },
+            { name: "Yashvi Thakur", roll: "150" }
+        ];
+
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const studentList = document.getElementById('studentList');
+        const studentCount = document.getElementById('studentCount');
+
+        // Function to display students
+        function displayStudents(studentsArray) {
+            studentList.innerHTML = '';
+            
+            if (studentsArray.length === 0) {
+                studentList.innerHTML = '<div class="no-results">No students found matching your search</div>';
+                studentCount.textContent = 'Showing 0 students';
+                return;
+            }
+            
+            studentCount.textContent = `Showing ${studentsArray.length} students`;
+            
+            studentsArray.forEach(student => {
+                const li = document.createElement('li');
+                li.className = 'student-item';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'student-name';
+                nameSpan.textContent = student.name;
+                
+                const rollSpan = document.createElement('span');
+                rollSpan.className = 'student-roll';
+                rollSpan.textContent = `Roll: ${student.roll}`;
+                
+                li.appendChild(nameSpan);
+                li.appendChild(rollSpan);
+                studentList.appendChild(li);
+            });
+        }
+
+        // Function to highlight matching text
+        function highlightText(text, query) {
+            if (!query) return text;
+            
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // Function to filter students
+        function filterStudents() {
+            const query = searchInput.value.toLowerCase().trim();
+            
+            if (query === '') {
+                displayStudents(students);
+                return;
+            }
+            
+            const filteredStudents = students.filter(student => 
+                student.name.toLowerCase().includes(query) || 
+                student.roll.includes(query)
+            );
+            
+            displayStudents(filteredStudents);
+        }
+
+        // Event listener for search input
+        searchInput.addEventListener('input', filterStudents);
+
+        // Initialize with all students
+        displayStudents(students);
+    </script>
+</body>
+</html>
